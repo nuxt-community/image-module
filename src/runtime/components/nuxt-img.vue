@@ -6,13 +6,15 @@
     :src="nSrc"
     :alt="nAlt"
     v-bind="nAttrs"
+    @error="setFallbackImage"
   >
 </template>
 
 <script lang="ts">
 import { generateAlt, useObserver, parseSize } from '~image'
 
-const EMPTY_GIF = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+const EMPTY_GIF =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
 export default {
   name: 'NuxtImg',
@@ -36,7 +38,8 @@ export default {
     // options
     preset: { type: String, required: false, default: undefined },
     provider: { type: String, required: false, default: undefined },
-    responsive: { type: Boolean, required: false, default: false }
+    responsive: { type: Boolean, required: false, default: false },
+    fallback: { type: String, required: false, default: undefined }
   },
   data () {
     return {
@@ -118,6 +121,13 @@ export default {
       if (this._removeObserver) {
         this._removeObserver()
         delete this._removeObserver
+      }
+    },
+    setFallbackImage (event) {
+      if (this._errored) { return }
+      this._errored = true
+      if (this.fallback) {
+        event.target.src = this.fallback
       }
     }
   }
