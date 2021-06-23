@@ -18,11 +18,8 @@
 <script lang="ts">
 import type { DefineComponentWithMixin } from '../../types/vue'
 import { imageMixin } from './image.mixin'
-
 import { getFileExtension } from '~image'
-
 const defineComponent: DefineComponentWithMixin = (opts: any) => opts
-
 export default defineComponent({
   name: 'NuxtPicture',
   mixins: [imageMixin],
@@ -61,21 +58,19 @@ export default defineComponent({
           srcset: this.src
         }]
       }
-
       const formats = this.nLegacyFormat !== this.nFormat
         ? [this.nLegacyFormat, this.nFormat]
         : [this.nFormat]
-
       const sources = formats.map((format) => {
         const { srcset, sizes, src } = this.$img.getSizes(this.src, {
           ...this.nOptions,
           sizes: this.sizes || this.$img.options.screens,
+          densities: this.densities || this.$img.options.densities,
           modifiers: {
             ...this.nModifiers,
             format
           }
         })
-
         return {
           src,
           type: `image/${format}`,
@@ -83,7 +78,6 @@ export default defineComponent({
           srcset
         }
       })
-
       return sources
     }
   },

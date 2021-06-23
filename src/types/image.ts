@@ -14,7 +14,8 @@ export interface ImageOptions {
 }
 
 export interface ImageSizesOptions extends ImageOptions {
-  sizes: Record<string, string|number> | string
+  sizes: Record<string, string|number> | string,
+  densities?: string
 }
 
 // eslint-disable-next-line no-use-before-define
@@ -35,6 +36,7 @@ export interface CreateImageOptions {
   presets: { [name: string]: ImageOptions }
   provider: string
   screens?: Record<string, number>,
+  densities?: string
 }
 
 export interface ImageInfo {

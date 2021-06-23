@@ -1,5 +1,13 @@
 import defu from 'defu'
-import type { ImageOptions, ImageSizesOptions, CreateImageOptions, ResolvedImage, MapToStatic, ImageCTX, $Img } from '../types/image'
+import type {
+  ImageOptions,
+  ImageSizesOptions,
+  CreateImageOptions,
+  ResolvedImage,
+  MapToStatic,
+  ImageCTX,
+  $Img
+} from '../types/image'
 import { imageMeta } from './utils/meta'
 import { parseSize } from './utils'
 import { useStaticImageMap } from './utils/static-map'
@@ -95,7 +103,10 @@ function resolveImage (ctx: ImageCTX, input: string, options: ImageOptions): Res
     }
   }
 
-  const { provider, defaults } = getProvider(ctx, options.provider || ctx.options.provider)
+  const {
+    provider,
+    defaults
+  } = getProvider(ctx, options.provider || ctx.options.provider)
   const preset = getPreset(ctx, options.preset)
 
   const _options: ImageOptions = defu(options, preset, defaults)
@@ -138,15 +149,19 @@ function getSizes (ctx: ImageCTX, input: string, opts: ImageSizesOptions) {
   const width = parseSize(opts.modifiers?.width)
   const height = parseSize(opts.modifiers?.height)
   const hwRatio = (width && height) ? height / width : 0
-  const variants = []
+  const sizeVariants = []
+  const densityVariants = []
 
   const sizes: Record<string, string> = {}
+  const densities: Array<number> = []
 
   // string => object
   if (typeof opts.sizes === 'string') {
     for (const entry of opts.sizes.split(/[\s,]+/).filter(e => e)) {
       const s = entry.split(':')
-      if (s.length !== 2) { continue }
+      if (s.length !== 2) {
+        continue
+      }
       sizes[s[0].trim()] = s[1].trim()
     }
   } else {
@@ -171,25 +186,57 @@ function getSizes (ctx: ImageCTX, input: string, opts: ImageSizesOptions) {
       _cWidth = Math.round((_cWidth / 100) * screenMaxWidth)
     }
     const _cHeight = hwRatio ? Math.round(_cWidth * hwRatio) : height
-    variants.push({
+    sizeVariants.push({
       width: _cWidth,
       size,
       screenMaxWidth,
       media: `(max-width: ${screenMaxWidth}px)`,
-      src: ctx.$img!(input, { ...opts.modifiers, width: _cWidth, height: _cHeight }, opts)
+      src: ctx.$img!(input, {
+        ...opts.modifiers,
+        width: _cWidth,
+        height: _cHeight
+      }, opts)
     })
   }
 
-  variants.sort((v1, v2) => v1.screenMaxWidth - v2.screenMaxWidth)
+  sizeVariants.sort((v1, v2) => v1.screenMaxWidth - v2.screenMaxWidth)
 
-  const defaultVar = variants[variants.length - 1]
+  const defaultVar = sizeVariants[sizeVariants.length - 1]
   if (defaultVar) {
     defaultVar.media = ''
   }
 
+  // Only use density if it is a string
+  if (typeof opts.densities === 'string') {
+    for (const entry of opts.densities.split(/[ ,]+/).filter(e => e)) {
+      if (/^\d[x]\b/.test(entry)) {
+        const dpiSize = parseInt(entry.replace(/^x/, ''))
+        if (isNaN(dpiSize) || dpiSize === 0 || !opts.sizes) {
+          continue
+        }
+        densities.push(...sizeVariants.map(s => s.width * dpiSize))
+      }
+    }
+  }
+
+  const uniqueDensities = Array.from(new Set(densities))
+  uniqueDensities.forEach((width) => {
+    const _cHeight = hwRatio ? Math.round(width * hwRatio) : height
+    densityVariants.push({
+      width,
+      src: ctx.$img!(input, {
+        ...opts.modifiers,
+        width,
+        height: _cHeight
+      }, opts)
+    })
+  })
+
+  densityVariants.sort((v1, v2) => v1.width - v2.width)
+
   return {
-    sizes: variants.map(v => `${v.media ? v.media + ' ' : ''}${v.size}`).join(', '),
-    srcset: variants.map(v => `${v.src} ${v.width}w`).join(', '),
+    sizes: sizeVariants.map(v => `${v.media ? v.media + ' ' : ''}${v.size}`).join(', '),
+    srcset: densityVariants.length ? densityVariants.map(v => `${v.src} ${v.width}w`).join(', ') : sizeVariants.map(v => `${v.src} ${v.width}w`).join(', '),
     src: defaultVar?.src
   }
 }

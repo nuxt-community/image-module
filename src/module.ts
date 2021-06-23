@@ -40,7 +40,8 @@ const imageModule: Module<ModuleOptions> = async function imageModule (moduleOpt
   const imageOptions: Omit<CreateImageOptions, 'providers'> = pick(options, [
     'screens',
     'presets',
-    'provider'
+    'provider',
+    'densities'
   ])
 
   options.static = options.static || {}
