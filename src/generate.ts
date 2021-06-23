@@ -7,12 +7,13 @@ import { dirname, join, relative, extname, basename, trimExt } from 'upath'
 import fetch from 'node-fetch'
 import { joinURL, hasProtocol, parseURL, withoutTrailingSlash } from 'ufo'
 import pLimit from 'p-limit'
+import { Nuxt } from '@nuxt/kit'
 import { ModuleOptions, MapToStatic, ResolvedImage } from './types'
 import { hash, logger } from './utils'
 
 const pipeline = promisify(stream.pipeline)
 
-export function setupStaticGeneration (nuxt: any, options: ModuleOptions) {
+export function setupStaticGeneration (nuxt: Nuxt, options: ModuleOptions) {
   const staticImages: Record<string, string> = {} // url ~> hashed file name
 
   nuxt.hook('vue-renderer:ssr:prepareContext', (renderContext: any) => {
@@ -58,7 +59,7 @@ async function downloadImage ({ url, name, outDir }: { url: string, name: string
     await mkdirp(dirname(dstFile))
     await pipeline(response.body, createWriteStream(dstFile))
     logger.success('Generated static image ' + relative(process.cwd(), dstFile))
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error.message)
   }
 }

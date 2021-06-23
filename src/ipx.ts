@@ -32,7 +32,7 @@ export const ipxSetup: ProviderSetup = async (_providerOptions, moduleOptions, n
     (mod: string | (() => any)) => typeof mod === 'string' && mod.includes('@nuxt/image')
   )
 
-  if (!isStatic && !hasUserProvidedIPX && !installedInModules && lt(nuxt.constructor.version, '2.16.0')) {
+  if (!isStatic && !hasUserProvidedIPX && !installedInModules && lt(nuxt.constructor?.version || '3.0.0', '2.16.0')) {
     // eslint-disable-next-line no-console
     console.warn('[@nuxt/image] If you would like to use the `ipx` provider at runtime.\nMake sure to follow the instructions at https://image.nuxtjs.org/providers/ipx .')
   }

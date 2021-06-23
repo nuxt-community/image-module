@@ -1,6 +1,7 @@
 import { normalize, resolve, dirname } from 'upath'
 import { writeJson, mkdirp } from 'fs-extra'
 import { parseURL } from 'ufo'
+import { resolveAlias, tryResolvePath, useNuxt } from '@nuxt/kit'
 import { hash } from './utils'
 import type { ModuleOptions, InputProvider, ImageModuleProvider, ProviderSetup } from './types'
 import { ipxSetup } from './ipx'
@@ -37,23 +38,24 @@ export const providerSetup: Record<string, ProviderSetup> = {
   }
 }
 
-export function resolveProviders (nuxt: any, options: ModuleOptions): ImageModuleProvider[] {
+export function resolveProviders (options: ModuleOptions): ImageModuleProvider[] {
   const providers: ImageModuleProvider[] = []
 
   for (const key in options) {
     if (BuiltInProviders.includes(key)) {
-      providers.push(resolveProvider(nuxt, key, { provider: key, options: options[key] }))
+      providers.push(resolveProvider(key, { provider: key, options: options[key] }))
     }
   }
 
   for (const key in options.providers) {
-    providers.push(resolveProvider(nuxt, key, options.providers[key]))
+    providers.push(resolveProvider(key, options.providers[key]))
   }
 
   return providers
 }
 
-export function resolveProvider (nuxt: any, key: string, input: InputProvider): ImageModuleProvider {
+export function resolveProvider (key: string, input: InputProvider): ImageModuleProvider {
+  const nuxt = useNuxt()
   if (typeof input === 'string') {
     input = { name: input }
   }
@@ -68,7 +70,7 @@ export function resolveProvider (nuxt: any, key: string, input: InputProvider): 
 
   input.provider = BuiltInProviders.includes(input.provider)
     ? require.resolve('./runtime/providers/' + input.provider)
-    : nuxt.resolver.resolvePath(input.provider)
+    : tryResolvePath(resolveAlias(input.provider, nuxt.options.alias))
 
   const setup = input.setup || providerSetup[input.name]
 

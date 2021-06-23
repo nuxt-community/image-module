@@ -11,14 +11,24 @@ imageOptions.providers = {
 <%=options.providers.map(p => `  ['${p.name}']: { provider: ${p.importName}, defaults: ${JSON.stringify(p.runtimeOptions)} }`).join(',\n') %>
 }
 
-
-Vue.component(NuxtImg.name, NuxtImg)
-Vue.component(NuxtPicture.name, NuxtPicture)
-Vue.component('NImg', NuxtImg)
-Vue.component('NPicture', NuxtPicture)
+if (Vue && 'component' in Vue) {
+  // Vue 2
+  Vue.component(NuxtImg.name, NuxtImg)
+  Vue.component(NuxtPicture.name, NuxtPicture)
+  Vue.component('NImg', NuxtImg)
+  Vue.component('NPicture', NuxtPicture)
+}
 
 export default function (nuxtContext, inject) {
   const $img = createImage(imageOptions, nuxtContext)
+
+  // Vue 3
+  if (nuxtContext.app?.component) {
+    nuxtContext.app.component(NuxtImg.name, NuxtImg)
+    nuxtContext.app.component(NuxtPicture.name, NuxtPicture)
+    nuxtContext.app.component('NImg', NuxtImg)
+    nuxtContext.app.component('NPicture', NuxtPicture)
+  }
 
   if (process.static && process.server) {
     nuxtContext.beforeNuxtRender(({ nuxtState }) => {
