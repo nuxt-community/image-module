@@ -142,6 +142,22 @@ export const operationsGenerator = createOperationsGenerator({
       clip: 'clip',
       facearea: 'facearea',
       fillMax: 'fillmax'
+    },
+    // https://docs.imgix.com/apis/rendering/format/fm
+    format: {
+      gif: 'gif',
+      jp2: 'jp2',
+      jpg: 'jpg',
+      json: 'json',
+      jxr: 'jxr',
+      pjpg: 'pjpg',
+      mp4: 'mp4',
+      png: 'png',
+      png8: 'png8',
+      png32: 'png32',
+      webm: 'webm',
+      webp: 'webp',
+      blurhash: 'blurhash'
     }
   },
   joinWith: '&',
