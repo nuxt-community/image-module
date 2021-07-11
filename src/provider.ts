@@ -5,6 +5,7 @@ import type { ModuleOptions, InputProvider, ImageModuleProvider, ProviderSetup }
 import { ipxSetup } from './ipx'
 
 const BuiltInProviders = [
+  'cloudflare',
   'cloudinary',
   'fastly',
   'glide',

@@ -13,6 +13,7 @@ export interface InputProvider<T = any> {
 }
 
 export interface ImageProviders {
+  cloudflare?: any
   cloudinary?: any
   fastly?: any
   glide?: any
