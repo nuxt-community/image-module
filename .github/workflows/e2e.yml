@@ -44,4 +44,4 @@ jobs:
         run: yarn test:e2e
 
       - name: Coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v2
